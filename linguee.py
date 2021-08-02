@@ -8,6 +8,9 @@ class Linguee:
     _linguee_url = r'https://www.linguee.com'
     _linguee_audio_url = _linguee_url + r'/mp3/'
     _languages = ['english', 'german']
+    _session = requests.Session()
+    _cookies = None
+    _timeout = 3
     _response = ""
     _response_element = None
     _dictionary = {}
@@ -60,7 +63,11 @@ class Linguee:
         linguee_search_url = self._root_url + 'search'
         params = {'source': 'auto', 'query': term}
         try:
-            self._response = requests.get(linguee_search_url, params=params)
+            self._response = self._session.get(linguee_search_url,
+                                               params=params,
+                                               cookies=self._cookies,
+                                               timeout=self._timeout)
+            self._cookies = self._response.cookies
             self._response.raise_for_status()
         except HTTPError as http_err:
             print("error")
@@ -111,7 +118,8 @@ class Linguee:
     def parse_term_lemma(self, lemma):
         main_tag = self.parse_tags(lemma.xpath(self._x_paths['main_tag'])[0])
 
-        main_pos = lemma.xpath(self._x_paths['main_pos'])[0].text
+        main_pos = lemma.xpath(self._x_paths['main_pos'])
+        main_pos = main_pos[0].text if main_pos else ""
 
         main_pron = lemma.xpath(self._x_paths['main_pron'])
         main_pron = self.parse_pronunciation(main_pron[0]) if main_pron else ""
@@ -132,7 +140,8 @@ class Linguee:
 
     def parse_term(self, term):
         result = []
-        for lemma in term[0].xpath(self._x_paths['lemma'])[0]:
+        lemmas = term[0].xpath(self._x_paths['lemma'])
+        for lemma in lemmas[0] if lemmas else "":
             if type(lemma) == html.HtmlElement and "lemma" in self.parse_classes(lemma):
                 result.append(self.parse_term_lemma(lemma))
         return result
@@ -151,12 +160,13 @@ class Linguee:
         d[term]['main_term'] = self.parse_term(main_term) if main_term else None
         d[term]['foreign_term'] = self.parse_term(foreign_term) if foreign_term else None
 
+        pprint.pp(d)
+
         return d
 
     def get_element(self, term):
         self.fetch_site(term)
         self._dictionary.update(self.parse_elements(self._response_element, term))
-        pprint.pp(self._dictionary)
 
     def search(self, term):
         if term not in self._dictionary:
