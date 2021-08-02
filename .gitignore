@@ -6,6 +6,7 @@ include
 lib
 lib64
 pyvenv.cfg
+wordlist.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
