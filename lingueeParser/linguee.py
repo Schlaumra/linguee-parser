@@ -1,5 +1,4 @@
 from lxml import html
-import pprint
 import requests
 from requests.exceptions import HTTPError
 
@@ -159,8 +158,6 @@ class Linguee:
 
         d[term]['main_term'] = self.parse_term(main_term) if main_term else None
         d[term]['foreign_term'] = self.parse_term(foreign_term) if foreign_term else None
-
-        pprint.pp(d)
 
         return d
 
