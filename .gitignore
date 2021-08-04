@@ -1,12 +1,11 @@
-test.py
-linguee.html
+test/
+data/
 .idea
-bin
 include
 lib
 lib64
 pyvenv.cfg
-wordlist.txt
+bin
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
